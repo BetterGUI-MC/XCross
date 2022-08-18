@@ -10,16 +10,52 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>ExampleAddon</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>XCross</artifactId>
+  <version>1.0</version>
   <packaging>jar</packaging>
 
-  <name>ExampleAddon</name>
-  <description>An Example addon for BetterGUI</description>
+  <name>XCross</name>
+  <description>Integrate XSeries for better cross-version support</description>
 
   <properties>
-    <project.mainClass>me.hsgamer.bettergui.exampleaddon.ExampleAddon</project.mainClass>
+    <project.mainClass>me.hsgamer.bettergui.xcross.XCross</project.mainClass>
   </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <minimizeJar>true</minimizeJar>
+              <relocations>
+                <!-- HSCore -->
+                <relocation>
+                  <pattern>me.hsgamer.hscore</pattern>
+                  <shadedPattern>me.hsgamer.bettergui.lib.core</shadedPattern>
+                </relocation>
+
+                <!-- bStats -->
+                <relocation>
+                  <pattern>org.bstats</pattern>
+                  <shadedPattern>me.hsgamer.bettergui.lib.bstats</shadedPattern>
+                </relocation>
+
+                <!-- XSeries -->
+                <relocation>
+                  <pattern>com.cryptomorin.xseries</pattern>
+                  <shadedPattern>me.hsgamer.bettergui.xcross.lib.xseries</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
   <repositories>
     <repository>
@@ -27,4 +63,12 @@
       <url>https://repo.codemc.io/repository/maven-public/</url>
     </repository>
   </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.cryptomorin</groupId>
+      <artifactId>XSeries</artifactId>
+      <version>9.0.0</version>
+    </dependency>
+  </dependencies>
 </project>
