@@ -7,6 +7,7 @@ import me.hsgamer.hscore.task.element.TaskProcess;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class XSoundAction extends BaseAction {
@@ -22,6 +23,9 @@ public class XSoundAction extends BaseAction {
             process.next();
             return;
         }
-        XSound.play(player, replacedString).thenAccept(XSound.Record::play).thenAccept(v -> process.next());
+        Optional.ofNullable(XSound.parse(replacedString))
+                .map(soundRecord -> soundRecord.forPlayer(player))
+                .ifPresent(XSound.Record::play);
+        process.next();
     }
 }
