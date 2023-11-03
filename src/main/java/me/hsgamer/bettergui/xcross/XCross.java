@@ -8,9 +8,9 @@ import me.hsgamer.bettergui.xcross.modifier.XEnchantmentModifier;
 import me.hsgamer.bettergui.xcross.modifier.XMaterialModifier;
 import me.hsgamer.bettergui.xcross.modifier.XPotionModifier;
 import me.hsgamer.bettergui.xcross.modifier.XSkullModifier;
-import me.hsgamer.hscore.bukkit.addon.PluginAddon;
+import me.hsgamer.hscore.expansion.common.Expansion;
 
-public final class XCross extends PluginAddon {
+public final class XCross implements Expansion {
     @Override
     public void onEnable() {
         ActionBuilder.INSTANCE.register(MusicAction::new, "music");

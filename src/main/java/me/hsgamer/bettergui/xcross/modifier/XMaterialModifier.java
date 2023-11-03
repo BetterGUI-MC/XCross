@@ -1,24 +1,22 @@
 package me.hsgamer.bettergui.xcross.modifier;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.hsgamer.hscore.bukkit.item.ItemModifier;
-import me.hsgamer.hscore.common.interfaces.StringReplacer;
+import me.hsgamer.hscore.common.StringReplacer;
+import me.hsgamer.hscore.minecraft.item.ItemComparator;
+import me.hsgamer.hscore.minecraft.item.ItemModifier;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.UUID;
 
-public class XMaterialModifier implements ItemModifier {
+public class XMaterialModifier implements ItemModifier<ItemStack>, ItemComparator<ItemStack> {
     private String materialString;
 
     @Override
-    public String getName() {
-        return "xmaterial";
-    }
-
-    @Override
-    public ItemStack modify(ItemStack original, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
-        XMaterial.matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacerMap.values()))
+    public @NotNull ItemStack modify(@NotNull ItemStack original, UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+        XMaterial.matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacers))
                 .ifPresent(xMaterial -> xMaterial.setType(original));
         return original;
     }
@@ -34,14 +32,16 @@ public class XMaterialModifier implements ItemModifier {
     }
 
     @Override
-    public void loadFromItemStack(ItemStack itemStack) {
-        this.materialString = XMaterial.matchXMaterial(itemStack).name();
+    public boolean loadFromItem(ItemStack itemStack) {
+        XMaterial material = XMaterial.matchXMaterial(itemStack);
+        this.materialString = material.name();
+        return true;
     }
 
     @Override
-    public boolean compareWithItemStack(ItemStack itemStack, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
+    public boolean compare(@NotNull ItemStack itemStack, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
         return XMaterial
-                .matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacerMap.values()))
+                .matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacers))
                 .map(xMaterial -> xMaterial.isSimilar(itemStack))
                 .orElse(false);
     }

@@ -1,17 +1,20 @@
 package me.hsgamer.bettergui.xcross.modifier;
 
 import com.cryptomorin.xseries.XPotion;
-import me.hsgamer.hscore.bukkit.item.ItemMetaModifier;
+import me.hsgamer.hscore.bukkit.item.modifier.ItemMetaComparator;
+import me.hsgamer.hscore.bukkit.item.modifier.ItemMetaModifier;
 import me.hsgamer.hscore.common.CollectionUtils;
-import me.hsgamer.hscore.common.interfaces.StringReplacer;
+import me.hsgamer.hscore.common.StringReplacer;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class XPotionModifier extends ItemMetaModifier {
+public class XPotionModifier implements ItemMetaModifier, ItemMetaComparator {
     private List<String> potionEffectList = Collections.emptyList();
 
     public List<PotionEffect> getParsed(UUID uuid, Collection<StringReplacer> stringReplacers) {
@@ -21,41 +24,25 @@ public class XPotionModifier extends ItemMetaModifier {
     }
 
     @Override
-    public String getName() {
-        return "xpotion";
-    }
-
-    @Override
-    public ItemMeta modifyMeta(ItemMeta meta, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
+    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
         if (meta instanceof PotionMeta) {
             PotionMeta potionMeta = (PotionMeta) meta;
-            getParsed(uuid, stringReplacerMap.values()).forEach(potionEffect -> potionMeta.addCustomEffect(potionEffect, true));
+            getParsed(uuid, stringReplacers).forEach(potionEffect -> potionMeta.addCustomEffect(potionEffect, true));
             return potionMeta;
         }
         return meta;
     }
 
     @Override
-    public void loadFromItemMeta(ItemMeta meta) {
+    public boolean loadFromItemMeta(ItemMeta meta) {
+        if (!(meta instanceof PotionMeta)) {
+            return false;
+        }
         this.potionEffectList = ((PotionMeta) meta).getCustomEffects()
                 .stream()
                 .map(potionEffect -> XPotion.matchXPotion(potionEffect.getType()).name() + ", " + potionEffect.getDuration() + ", " + potionEffect.getAmplifier())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean canLoadFromItemMeta(ItemMeta meta) {
-        return meta instanceof PotionMeta;
-    }
-
-    @Override
-    public boolean compareWithItemMeta(ItemMeta meta, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
-        if (!(meta instanceof PotionMeta)) {
-            return false;
-        }
-        List<PotionEffect> list1 = getParsed(uuid, stringReplacerMap.values());
-        List<PotionEffect> list2 = ((PotionMeta) meta).getCustomEffects();
-        return list1.size() == list2.size() && new HashSet<>(list1).containsAll(list2);
+        return true;
     }
 
     @Override
@@ -66,5 +53,15 @@ public class XPotionModifier extends ItemMetaModifier {
     @Override
     public void loadFromObject(Object object) {
         this.potionEffectList = CollectionUtils.createStringListFromObject(object, true);
+    }
+
+    @Override
+    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+        if (!(meta instanceof PotionMeta)) {
+            return false;
+        }
+        List<PotionEffect> list1 = getParsed(uuid, stringReplacers);
+        List<PotionEffect> list2 = ((PotionMeta) meta).getCustomEffects();
+        return list1.size() == list2.size() && new HashSet<>(list1).containsAll(list2);
     }
 }

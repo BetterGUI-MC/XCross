@@ -1,26 +1,24 @@
 package me.hsgamer.bettergui.xcross.modifier;
 
 import com.cryptomorin.xseries.XEnchantment;
-import me.hsgamer.hscore.bukkit.item.ItemMetaModifier;
+import me.hsgamer.hscore.bukkit.item.modifier.ItemMetaComparator;
+import me.hsgamer.hscore.bukkit.item.modifier.ItemMetaModifier;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.hscore.common.CollectionUtils;
+import me.hsgamer.hscore.common.StringReplacer;
 import me.hsgamer.hscore.common.Validate;
-import me.hsgamer.hscore.common.interfaces.StringReplacer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class XEnchantmentModifier extends ItemMetaModifier {
+public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparator {
     private List<String> enchantmentList = Collections.emptyList();
-
-    @Override
-    public String getName() {
-        return "xenchantment";
-    }
 
     private Map<XEnchantment, Integer> getParsed(UUID uuid, Collection<StringReplacer> stringReplacers) {
         Map<XEnchantment, Integer> enchantments = new EnumMap<>(XEnchantment.class);
@@ -53,8 +51,8 @@ public class XEnchantmentModifier extends ItemMetaModifier {
     }
 
     @Override
-    public ItemMeta modifyMeta(ItemMeta meta, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
-        Map<XEnchantment, Integer> map = getParsed(uuid, stringReplacerMap.values());
+    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+        Map<XEnchantment, Integer> map = getParsed(uuid, stringReplacers);
         Map<Enchantment, Integer> enchantments = new HashMap<>();
         for (Map.Entry<XEnchantment, Integer> entry : map.entrySet()) {
             Enchantment enchantment = entry.getKey().getEnchant();
@@ -71,21 +69,20 @@ public class XEnchantmentModifier extends ItemMetaModifier {
     }
 
     @Override
-    public void loadFromItemMeta(ItemMeta meta) {
+    public boolean loadFromItemMeta(ItemMeta meta) {
+        if (!meta.hasEnchants()) {
+            return false;
+        }
         this.enchantmentList = meta.getEnchants().entrySet()
                 .stream()
                 .map(entry -> XEnchantment.matchXEnchantment(entry.getKey()).name() + ", " + entry.getValue())
                 .collect(Collectors.toList());
+        return true;
     }
 
     @Override
-    public boolean canLoadFromItemMeta(ItemMeta meta) {
-        return meta.hasEnchants();
-    }
-
-    @Override
-    public boolean compareWithItemMeta(ItemMeta meta, UUID uuid, Map<String, StringReplacer> stringReplacerMap) {
-        Map<XEnchantment, Integer> list1 = getParsed(uuid, stringReplacerMap.values());
+    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+        Map<XEnchantment, Integer> list1 = getParsed(uuid, stringReplacers);
         Map<XEnchantment, Integer> list2 = new EnumMap<>(XEnchantment.class);
         meta.getEnchants().forEach(((enchantment, integer) -> list2.put(XEnchantment.matchXEnchantment(enchantment), integer)));
         if (list1.size() != list2.size()) {
