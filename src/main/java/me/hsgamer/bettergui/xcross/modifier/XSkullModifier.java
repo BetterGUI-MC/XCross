@@ -21,7 +21,7 @@ public class XSkullModifier implements ItemMetaModifier {
             return meta;
         }
         String value = stringReplacer.replaceOrOriginal(skullString, uuid);
-        return XSkull.of(meta).profile(Profileable.detect(value)).apply();
+        return XSkull.of(meta).profile(Profileable.detect(value)).lenient().apply();
     }
 
     @Override
