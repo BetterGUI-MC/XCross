@@ -8,15 +8,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.UUID;
 
 public class XMaterialModifier implements ItemModifier<ItemStack>, ItemComparator<ItemStack> {
     private String materialString;
 
     @Override
-    public @NotNull ItemStack modify(@NotNull ItemStack original, UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
-        XMaterial.matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacers))
+    public @NotNull ItemStack modify(@NotNull ItemStack original, UUID uuid, @NotNull StringReplacer stringReplacer) {
+        XMaterial.matchXMaterial(stringReplacer.replaceOrOriginal(materialString, uuid))
                 .ifPresent(xMaterial -> xMaterial.setType(original));
         return original;
     }
@@ -39,9 +38,9 @@ public class XMaterialModifier implements ItemModifier<ItemStack>, ItemComparato
     }
 
     @Override
-    public boolean compare(@NotNull ItemStack itemStack, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+    public boolean compare(@NotNull ItemStack itemStack, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
         return XMaterial
-                .matchXMaterial(StringReplacer.replace(materialString, uuid, stringReplacers))
+                .matchXMaterial(stringReplacer.replaceOrOriginal(materialString, uuid))
                 .map(xMaterial -> xMaterial.isSimilar(itemStack))
                 .orElse(false);
     }

@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparator {
     private List<String> enchantmentList = Collections.emptyList();
 
-    private Map<XEnchantment, Integer> getParsed(UUID uuid, Collection<StringReplacer> stringReplacers) {
+    private Map<XEnchantment, Integer> getParsed(UUID uuid, StringReplacer stringReplacer) {
         Map<XEnchantment, Integer> enchantments = new EnumMap<>(XEnchantment.class);
         for (String string : enchantmentList) {
             Optional<XEnchantment> enchantment;
-            string = StringReplacer.replace(string, uuid, stringReplacers);
+            string = stringReplacer.replaceOrOriginal(string, uuid);
 
             int level = 1;
             if (string.contains(",")) {
@@ -51,8 +51,8 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
     }
 
     @Override
-    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
-        Map<XEnchantment, Integer> map = getParsed(uuid, stringReplacers);
+    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
+        Map<XEnchantment, Integer> map = getParsed(uuid, stringReplacer);
         Map<Enchantment, Integer> enchantments = new HashMap<>();
         for (Map.Entry<XEnchantment, Integer> entry : map.entrySet()) {
             Enchantment enchantment = entry.getKey().getEnchant();
@@ -81,8 +81,8 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
     }
 
     @Override
-    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
-        Map<XEnchantment, Integer> list1 = getParsed(uuid, stringReplacers);
+    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
+        Map<XEnchantment, Integer> list1 = getParsed(uuid, stringReplacer);
         Map<XEnchantment, Integer> list2 = new EnumMap<>(XEnchantment.class);
         meta.getEnchants().forEach(((enchantment, integer) -> list2.put(XEnchantment.matchXEnchantment(enchantment), integer)));
         if (list1.size() != list2.size()) {

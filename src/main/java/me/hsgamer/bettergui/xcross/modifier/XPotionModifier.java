@@ -17,17 +17,17 @@ import java.util.stream.Collectors;
 public class XPotionModifier implements ItemMetaModifier, ItemMetaComparator {
     private List<String> potionEffectList = Collections.emptyList();
 
-    public List<PotionEffect> getParsed(UUID uuid, Collection<StringReplacer> stringReplacers) {
+    public List<PotionEffect> getParsed(UUID uuid, StringReplacer stringReplacer) {
         List<String> list = new ArrayList<>(potionEffectList);
-        list.replaceAll(s -> StringReplacer.replace(s, uuid, stringReplacers));
+        list.replaceAll(s -> stringReplacer.replaceOrOriginal(s, uuid));
         return XPotion.parseEffects(list).stream().map(XPotion.Effect::getEffect).collect(Collectors.toList());
     }
 
     @Override
-    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+    public @NotNull ItemMeta modifyMeta(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
         if (meta instanceof PotionMeta) {
             PotionMeta potionMeta = (PotionMeta) meta;
-            getParsed(uuid, stringReplacers).forEach(potionEffect -> potionMeta.addCustomEffect(potionEffect, true));
+            getParsed(uuid, stringReplacer).forEach(potionEffect -> potionMeta.addCustomEffect(potionEffect, true));
             return potionMeta;
         }
         return meta;
@@ -56,11 +56,11 @@ public class XPotionModifier implements ItemMetaModifier, ItemMetaComparator {
     }
 
     @Override
-    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull Collection<StringReplacer> stringReplacers) {
+    public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
         if (!(meta instanceof PotionMeta)) {
             return false;
         }
-        List<PotionEffect> list1 = getParsed(uuid, stringReplacers);
+        List<PotionEffect> list1 = getParsed(uuid, stringReplacer);
         List<PotionEffect> list2 = ((PotionMeta) meta).getCustomEffects();
         return list1.size() == list2.size() && new HashSet<>(list1).containsAll(list2);
     }
