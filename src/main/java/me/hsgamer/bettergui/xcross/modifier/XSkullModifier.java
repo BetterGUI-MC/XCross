@@ -29,7 +29,7 @@ public class XSkullModifier implements ItemMetaModifier {
         if (!(meta instanceof SkullMeta)) {
             return false;
         }
-        this.skullString = Optional.ofNullable(XSkull.of(meta).getProfileString()).orElse("");
+        this.skullString = Optional.ofNullable(XSkull.of(meta).getProfileValue()).orElse("");
         return true;
     }
 
