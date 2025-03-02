@@ -21,7 +21,7 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
     private List<String> enchantmentList = Collections.emptyList();
 
     private Map<XEnchantment, Integer> getParsed(UUID uuid, StringReplacer stringReplacer) {
-        Map<XEnchantment, Integer> enchantments = new EnumMap<>(XEnchantment.class);
+        Map<XEnchantment, Integer> enchantments = new HashMap<>();
         for (String string : enchantmentList) {
             Optional<XEnchantment> enchantment;
             string = stringReplacer.replaceOrOriginal(string, uuid);
@@ -29,7 +29,7 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
             int level = 1;
             if (string.contains(",")) {
                 String[] split = string.split(",", 2);
-                enchantment = XEnchantment.matchXEnchantment(split[0].trim());
+                enchantment = XEnchantment.of(split[0].trim());
                 String rawLevel = split[1].trim();
                 Optional<BigDecimal> optional = Validate.getNumber(rawLevel);
                 if (optional.isPresent()) {
@@ -39,7 +39,7 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
                     continue;
                 }
             } else {
-                enchantment = XEnchantment.matchXEnchantment(string.trim());
+                enchantment = XEnchantment.of(string.trim());
             }
             if (enchantment.isPresent()) {
                 enchantments.put(enchantment.get(), level);
@@ -55,7 +55,7 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
         Map<XEnchantment, Integer> map = getParsed(uuid, stringReplacer);
         Map<Enchantment, Integer> enchantments = new HashMap<>();
         for (Map.Entry<XEnchantment, Integer> entry : map.entrySet()) {
-            Enchantment enchantment = entry.getKey().getEnchant();
+            Enchantment enchantment = entry.getKey().get();
             if (enchantment != null) {
                 enchantments.put(enchantment, entry.getValue());
             }
@@ -75,7 +75,7 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
         }
         this.enchantmentList = meta.getEnchants().entrySet()
                 .stream()
-                .map(entry -> XEnchantment.matchXEnchantment(entry.getKey()).name() + ", " + entry.getValue())
+                .map(entry -> XEnchantment.of(entry.getKey()).name() + ", " + entry.getValue())
                 .collect(Collectors.toList());
         return true;
     }
@@ -83,8 +83,8 @@ public class XEnchantmentModifier implements ItemMetaModifier, ItemMetaComparato
     @Override
     public boolean compare(@NotNull ItemMeta meta, @Nullable UUID uuid, @NotNull StringReplacer stringReplacer) {
         Map<XEnchantment, Integer> list1 = getParsed(uuid, stringReplacer);
-        Map<XEnchantment, Integer> list2 = new EnumMap<>(XEnchantment.class);
-        meta.getEnchants().forEach(((enchantment, integer) -> list2.put(XEnchantment.matchXEnchantment(enchantment), integer)));
+        Map<XEnchantment, Integer> list2 = new HashMap<>();
+        meta.getEnchants().forEach(((enchantment, integer) -> list2.put(XEnchantment.of(enchantment), integer)));
         if (list1.size() != list2.size()) {
             return false;
         }

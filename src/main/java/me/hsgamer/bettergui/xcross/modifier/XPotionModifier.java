@@ -40,7 +40,7 @@ public class XPotionModifier implements ItemMetaModifier, ItemMetaComparator {
         }
         this.potionEffectList = ((PotionMeta) meta).getCustomEffects()
                 .stream()
-                .map(potionEffect -> XPotion.matchXPotion(potionEffect.getType()).name() + ", " + potionEffect.getDuration() + ", " + potionEffect.getAmplifier())
+                .map(potionEffect -> XPotion.of(potionEffect.getType()).name() + ", " + potionEffect.getDuration() + ", " + potionEffect.getAmplifier())
                 .collect(Collectors.toList());
         return true;
     }
