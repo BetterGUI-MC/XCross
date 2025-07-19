@@ -2,6 +2,7 @@ package me.hsgamer.bettergui.xcross.action;
 
 import com.cryptomorin.xseries.NoteBlockMusic;
 import me.hsgamer.bettergui.builder.ActionBuilder;
+import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.hscore.action.common.Action;
 import me.hsgamer.hscore.common.StringReplacer;
 import me.hsgamer.hscore.task.element.TaskProcess;
@@ -25,6 +26,10 @@ public class MusicAction implements Action {
             process.next();
             return;
         }
-        NoteBlockMusic.playMusic(player, player::getLocation, replacedString).thenAccept(v -> process.next());
+        SchedulerUtil.async().run(() -> {
+            NoteBlockMusic.playMusic(player, player::getLocation, replacedString);
+            process.next();
+        });
+
     }
 }
