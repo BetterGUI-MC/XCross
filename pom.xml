@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>XCross</artifactId>
-  <version>4.4</version>
+  <version>4.5</version>
   <packaging>jar</packaging>
 
   <name>XCross</name>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>com.github.cryptomorin</groupId>
       <artifactId>XSeries</artifactId>
-      <version>13.3.3</version>
+      <version>13.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>*</groupId>
